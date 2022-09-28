@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, current, PayloadAction } from '@reduxjs/toolkit';
 import { RootState, AppThunk } from '../../app/store';
 
 export interface desktopItem {
@@ -25,11 +25,19 @@ const itemsSlice = createSlice({
         state = state.filter(item => item.id === action.payload.id)
         state.push(current)
       }
+    },
+    addItem: (state, { payload }) => {
+      const id = Math.max(...state.map(el => el.id)) + 1 //infinity если удалить все
+      const newItem = {...payload, id}
+      state.push(newItem)
+    },
+    deleteItem: (state, { payload }) => {
+      return current(state).filter(el => el.id !== payload)
     }
   }
 })
 
-export const { moveItem } = itemsSlice.actions
+export const { moveItem, addItem, deleteItem } = itemsSlice.actions
 export const getItems = (state: RootState) => state.items
 export default itemsSlice.reducer
 
