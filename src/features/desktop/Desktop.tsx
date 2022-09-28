@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
 import { useAppSelector, useAppDispatch } from '../../app/hooks';
 import css from './desktop.module.css'
-import { addItem, deleteItem, desktopItem, getItems, moveItem } from './desktopSlice';
+import { addItem, deleteItem, desktopItem, getItems, getMaxId, moveItem } from './desktopSlice';
 
 
 export function Desktop() {
     const dispatch = useAppDispatch()
     const items = useAppSelector(getItems)    
+    const maxId = useAppSelector(getMaxId)
     const [selected, setSelected] = useState<number | null>(null)
     const [moving, setMoving] = useState<boolean>(false)
     const [coordinates, setCoordinates] = useState({x: 0, y: 0})
@@ -17,7 +19,6 @@ export function Desktop() {
         if(selected){
             dispatch(moveItem({id: selected, x: coordinates.x - shift.x, y: coordinates.y - shift.y }))
             setMoving(false)
-            //setSelected(null)
         }
     }
     function mouseDown(){
@@ -39,7 +40,7 @@ export function Desktop() {
         }
     }
     function deleting(e: any){
-        if(e.code === 'Delete'){
+        if(e.code === 'Delete' || e.code === 'Backspace'){
             dispatch(deleteItem(selected))
         }
     }
@@ -61,18 +62,25 @@ export function Desktop() {
         }
         
     }, [copy])
+
+    useEffect(()=>{
+        if(copy.id !== 0){
+            gsap.to(document.querySelector(`#item${maxId}`), { rotation: "+=360" });
+        }
+    }, [items.length])
     
     return (
         <div className={css.desktop} 
             onMouseUp={mouseUp}
             onMouseMove={mouseMove}
+            onClick={()=>setSelected(null)}
         >
             {items.map(el => {
                 return (
                     <div 
                         style={{left: el.x, top: el.y, borderColor: selected === el.id ? 'black' : 'red', cursor: 'pointer'}}
                         key={el.id} 
-                        id={`${el.id}`} 
+                        id={`item${el.id}`} 
                         className={css.item} 
                         onMouseDown={(e)=>{
                             setMoving(true) 
@@ -80,18 +88,17 @@ export function Desktop() {
                             setShift({x: e.pageX - el.x, y: e.pageY - el.y}) 
                             setCoordinates({x: e.pageX, y: e.pageY})
                         }}
-                        onClick={(e)=>{setSelected(el.id)}}
+                        onClick={()=>{setSelected(el.id)}}
                     >
                         {el.id}
                     </div>
                 )
             })}
-            {selected && moving && <div 
+            {selected && moving && <div id="clone"
                 className={css.item} 
                 style={{left: coordinates.x - shift.x, top: coordinates.y - shift.y, position: 'absolute', cursor: 'pointer', borderColor: 'rgba(0, 0, 0, 0.5)'}}>
                     {selected}
             </div>}
-            
 
         </div>
     );

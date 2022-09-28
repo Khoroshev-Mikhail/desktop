@@ -39,5 +39,6 @@ const itemsSlice = createSlice({
 
 export const { moveItem, addItem, deleteItem } = itemsSlice.actions
 export const getItems = (state: RootState) => state.items
+export const getMaxId = (state: RootState) => Math.max(...state.items.map(el => el.id))
 export default itemsSlice.reducer
 
