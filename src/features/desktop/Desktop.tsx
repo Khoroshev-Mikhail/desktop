@@ -14,6 +14,8 @@ export function Desktop() {
     const [coordinates, setCoordinates] = useState({x: 0, y: 0})
     const [shift, setShift] = useState({x: 0, y: 0})
     const [copy, setCopy] = useState<desktopItem>({id: 0, x: 10, y: 330})
+    const [itemsLength, setItemsLength] = useState<number>(items.length)
+    const desktop = document.querySelector('#desktop')?.getBoundingClientRect()
 
     function mouseUp(){
         if(selected){
@@ -64,7 +66,8 @@ export function Desktop() {
     }, [copy])
 
     useEffect(()=>{
-        if(copy.id !== 0){
+        if(items.length > itemsLength && copy.id !== 0){
+            setItemsLength(items.length)
             gsap.to(document.querySelector(`#item${maxId}`), { rotation: "+=360" });
         }
     }, [items.length])
